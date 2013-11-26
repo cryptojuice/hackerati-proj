@@ -1,8 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, REAL, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from app import Base
 
-Base = declarative_base()
 
 class Minutely(Base):
     __tablename__ = "minutely"
