@@ -1,0 +1,125 @@
+var app = angular.module('bitcoinchart', ['ui.router', 'angles']);
+
+app.config(['$stateProvider','$urlRouterProvider', '$locationProvider',
+        function($stateProvider, $urlRouterProvider, $locationProvider) {
+    $urlRouterProvider.otherwise('/minutely');
+    
+    $stateProvider
+    .state('minutely', {
+        url : "/minutely",
+        templateUrl : "/static/partials/minutely.html",
+        controller : "MinutelyController"
+    });
+
+    $locationProvider.html5Mode(false);
+}]);
+
+app.controller('MinutelyController', ['$scope', '$http', 
+        function($scope, $http) {
+    $scope.interval = "minutely";
+
+    $http.get('/api/v1/' + $scope.interval).success(function(data) {
+        $scope.bitcoinData = data.data;
+
+        var chartLabels = [];
+        var bidPrice = [];
+        var askPrice = [];
+
+
+        for (var i = 0; i < 30; i++){
+            chartLabels.push(i);
+        }
+
+        if ($scope.bitcoinData.length > 30) {
+            var j = $scope.bitcoinData.length - 30;
+            for (j; j < $scope.bitcoinData.length; j++) {
+                bidPrice.push($scope.bitcoinData[j].bid);
+                askPrice.push($scope.bitcoinData[j].ask);
+            }
+        }
+
+        $scope.chart = {
+            labels : chartLabels,
+            datasets : [
+                    {
+                            fillColor : "rgba(39,124,242,0)",
+                            strokeColor: "rgba(39,124,242,1)",
+                            pointColor: "rgba(39,124,242,1)",
+                            pointStrokeColor : "#fff",
+                            data : bidPrice
+                    },
+                    {
+                            fillColor : "rgba(255,0,251,0)",
+                            strokeColor: "rgba(255,0,251,1)",
+                            pointColor: "rgba(255,0,251,1)",
+                            pointStrokeColor : "#fff",
+                            data : askPrice
+                    }
+            ]
+        };
+    });
+
+}]);
+
+
+
+$(document).ready(function(){
+    var ctx = $("#myChart").get(0).getContext("2d");
+
+    
+    var xLabel = [];
+    var lastPrice = [];
+    var bidPrice = [];
+    var askPrice = [];
+
+    var interval = "minutely";
+
+    $("#interval").change(function(){
+        interval = this.value;
+        var myNewChart = new Chart(ctx).Line(chartData);
+    });
+
+    $.getJSON("/api/v1/" + interval).done(function(data) {
+        console.log(data.data.length);
+        date = new Date();
+        console.log(date);
+
+        for (var i=0; i < 30; i++) {
+            xLabel.push(i);
+        }
+
+        if (data.data.length > 30) {
+            var j = data.data.length - 30;
+            for (j; j < data.data.length; j++) {
+                //date = new Date(data.data[j].timestamp);
+                //xLabel.push(date.toLocaleTimeString());
+                lastPrice.push(data.data[j].last);
+                bidPrice.push(data.data[j].bid);
+                askPrice.push(data.data[j].ask);
+            }
+        }
+
+        var chartData = {
+            labels : xLabel,
+            datasets : [
+                    {
+                            fillColor : "rgba(39,124,242,0)",
+                            strokeColor: "rgba(39,124,242,1)",
+                            pointColor: "rgba(39,124,242,1)",
+                            pointStrokeColor : "#fff",
+                            data : bidPrice
+                    },
+                    {
+                            fillColor : "rgba(255,0,251,0)",
+                            strokeColor: "rgba(255,0,251,1)",
+                            pointColor: "rgba(255,0,251,1)",
+                            pointStrokeColor : "#fff",
+                            data : askPrice
+                    }
+            ]
+        };
+
+        var myNewChart = new Chart(ctx).Line(chartData);
+    });
+
+});
