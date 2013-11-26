@@ -40,14 +40,16 @@ app.controller('MinutelyController', ['$scope', '$http',
         }
 
         if ($scope.bitcoinData.length > 30) {
-            bidPrice = [];
-            askPrice = [];
             var j = $scope.bitcoinData.length - 30;
 
             for (j; j < $scope.bitcoinData.length; j++) {
-                console.log(j)
                 bidPrice.push($scope.bitcoinData[j].bid);
                 askPrice.push($scope.bitcoinData[j].ask);
+            }
+        } else {
+            for (var k in $scope.bitcoinData){
+                bidPrice.push($scope.bitcoinData[k].bid);
+                askPrice.push($scope.bitcoinData[k].ask);
             }
         }
 
