@@ -1,3 +1,9 @@
+"""
+This modules fetches bitcoin data from firebase feed.
+Scheduled jobs run by the minute, hourly and daily.
+
+"""
+
 import json
 import time, datetime
 import urllib2
@@ -6,12 +12,30 @@ import schedule
 from app import db_session
 from app.models.bitcoin import Minutely, Hourly, Daily
 
-URL = "https://publicdata-bitcoin.firebaseio.com/.json"
 
 def fetch_bitcoin_data():
-    req = urllib2.urlopen(URL)
+    """
+    Pull bitcoin price data from firebase.
+    """
+
+    url = "https://publicdata-bitcoin.firebaseio.com/.json"
+
+    try:
+        req = urllib2.urlopen(url)
+    except urllib2.URLError:
+        print("connection to {} failed.".format(url))
+
     resp = json.loads(req.read())
     return resp
+
+
+def save_bitcoin_data(data):
+    """
+    Save to database using db_session.
+    """
+    db_session.add(data)
+    db_session.commit()
+    return True
 
 
 def bitcoin_fetch_minutely():
@@ -19,22 +43,19 @@ def bitcoin_fetch_minutely():
 
     minutely = Minutely(last=data['last'], bid=data['last'], ask=data['ask'], \
             timestamp=datetime.datetime.now())
+    save_bitcoin_data(minutely)
+    print("Running job: 'minutely'")
 
-    db_session.add(minutely)
-    db_session.commit()
-    print("Log: Running minute job.")
-    return True
-    
+
 def bitcoin_fetch_hourly():
     data = fetch_bitcoin_data()
 
     hourly = Hourly(last=data['last'], bid=data['bid'], ask=data['ask'], \
             timestamp=datetime.datetime.now())
 
-    db_session.add(hourly)
-    db_session.commit()
-    print("Log: Running hourly job.")
-    return True
+    save_bitcoin_data(hourly)
+    print("Running job: 'hourly'")
+
 
 def bitcoin_fetch_daily():
     data = fetch_bitcoin_data()
@@ -42,12 +63,12 @@ def bitcoin_fetch_daily():
     daily = Daily(last=data['last'], bid=data['bid'], ask=data['ask'], \
             timestamp=datetime.datetime.now())
 
-    db_session.add(daily)
-    db_session.commit()
-    print("Log: Running daily job.")
-    return True
+    save_bitcoin_data(daily)
+    print("Running job: 'daily'")
+
 
 def main():
+    # schedule jobs frequency.
     schedule.every(1).minutes.do(bitcoin_fetch_minutely)
     schedule.every(1).hour.do(bitcoin_fetch_hourly)
     schedule.every(1).day.do(bitcoin_fetch_daily)
