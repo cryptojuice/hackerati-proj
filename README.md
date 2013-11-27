@@ -1,23 +1,23 @@
 #Bitcoin price tracker
 ===========
 
-Stack:
-======
+##Stack
 
-Python
-------
+
+####Python
+
 * Flask
 * Scheduler
 * SQLAlchemy
 
-Javascript
-----------
+####Javascript
+
 * Angularjs
 * jQuery
 * Chart.js
 
-CSS
----
+####CSS
+
 * Bootstrap
 
 
