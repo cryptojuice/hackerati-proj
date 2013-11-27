@@ -24,6 +24,7 @@ def fetch_bitcoin_data():
         req = urllib2.urlopen(url)
     except urllib2.URLError:
         print("connection to {} failed.".format(url))
+        return False
 
     resp = json.loads(req.read())
     return resp
@@ -41,30 +42,33 @@ def save_bitcoin_data(data):
 def bitcoin_fetch_minutely():
     data = fetch_bitcoin_data()
 
-    minutely = Minutely(last=data['last'], bid=data['last'], ask=data['ask'], \
-            timestamp=datetime.datetime.now())
-    save_bitcoin_data(minutely)
-    print("Running job: 'minutely'")
+    if data:
+        minutely = Minutely(last=data['last'], bid=data['last'], ask=data['ask'], \
+                timestamp=datetime.datetime.now())
+        save_bitcoin_data(minutely)
+        print("Running job: 'minutely'")
 
 
 def bitcoin_fetch_hourly():
     data = fetch_bitcoin_data()
 
-    hourly = Hourly(last=data['last'], bid=data['bid'], ask=data['ask'], \
-            timestamp=datetime.datetime.now())
+    if data:
+        hourly = Hourly(last=data['last'], bid=data['bid'], ask=data['ask'], \
+                timestamp=datetime.datetime.now())
 
-    save_bitcoin_data(hourly)
-    print("Running job: 'hourly'")
+        save_bitcoin_data(hourly)
+        print("Running job: 'hourly'")
 
 
 def bitcoin_fetch_daily():
     data = fetch_bitcoin_data()
 
-    daily = Daily(last=data['last'], bid=data['bid'], ask=data['ask'], \
-            timestamp=datetime.datetime.now())
+    if data:
+        daily = Daily(last=data['last'], bid=data['bid'], ask=data['ask'], \
+                timestamp=datetime.datetime.now())
 
-    save_bitcoin_data(daily)
-    print("Running job: 'daily'")
+        save_bitcoin_data(daily)
+        print("Running job: 'daily'")
 
 
 def main():
